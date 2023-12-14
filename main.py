@@ -21,12 +21,12 @@ for model in models:
         facial_area = face['facial_area']
         face_coords = [facial_area['x'], facial_area['y'], facial_area['x'] + facial_area['w'], facial_area['y'] + facial_area['h']]
 
-        dfs = model.find(img_path = image_path, db_path = "data/train_images")
+        result = model.find(img_path = image_path, db_path = "data/train_images")
 
-        print('RES2', dfs)
+        print('RES2', result)
 
         try:
-            closest = dfs[0].values[0]
+            closest = result[0].values[0]
             name = closest[0].split('/')[2]
             distance = closest[-1]
         except IndexError: #Не распознано
