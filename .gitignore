@@ -1,2 +1,5 @@
 networks/models/weights/*
 data/train_images/representations_*
+/output.json
+/venv/
+.idea

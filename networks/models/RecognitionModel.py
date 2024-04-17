@@ -48,7 +48,7 @@ class RecognitionModel:
                         exact_path = r + "/" + file
                         people.append(exact_path)
 
-
+            print(people, 'PEOPLE')
             representations = []
 
             for index in range(0, len(people)):

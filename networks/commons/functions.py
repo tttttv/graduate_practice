@@ -139,7 +139,7 @@ def get_target_size(model_name):
     target_sizes = {
         "VGG-Face": (224, 224),
         "Facenet": (160, 160),
-        "OpenFace": (96, 96),
+        "OpenFace": (100, 100),
         "DeepID": (47, 55),
     }
 
