@@ -26,8 +26,10 @@ def get_threshhold(model_name):
     thresholds = {
         "VGG-Face": 0.60,
         "Facenet": 10,
-        "OpenFace": 0.55,
-        "DeepID": 45
+        "OpenFace": 0.6, #0.55,
+        "DeepID": 45,#45
+        "ArcFace": 4.15,
+        "GhostFaceNet": 35.71
     }
 
     threshold = thresholds.get(model_name, base_threshold)
@@ -139,8 +141,10 @@ def get_target_size(model_name):
     target_sizes = {
         "VGG-Face": (224, 224),
         "Facenet": (160, 160),
-        "OpenFace": (100, 100),
+        "OpenFace": (96, 96),
         "DeepID": (47, 55),
+        "ArcFace": (112, 112),
+        "GhostFaceNet": (112, 112),
     }
 
     target_size = target_sizes.get(model_name)

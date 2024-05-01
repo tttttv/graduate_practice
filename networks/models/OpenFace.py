@@ -12,10 +12,22 @@ from networks.models.RecognitionModel import RecognitionModel
 class OpenFace(RecognitionModel):
     def __init__(self):
         super().__init__()
+
+        import tensorflow as tf
+        from keras.utils import CustomObjectScope
+        from keras.models import load_model
+        path = os.path.dirname(os.path.abspath(__file__)) + "/weights/nn4.small2.v1.h5"
+        print(path)
+        with CustomObjectScope({'tf': tf}):
+            model = load_model(path)
+        self.model = model
+        return
+
         self.model_name = "OpenFace"
 
         model = generate_model()
-        path = os.path.dirname(os.path.abspath(__file__)) + "/weights/openface_weights.h5"
+        #path = os.path.dirname(os.path.abspath(__file__)) + "/weights/openface_weights.h5"
+        path = os.path.dirname(os.path.abspath(__file__)) + "/weights/nn4.small2.v1.h5"
         model.load_weights(path)
 
         self.model = model

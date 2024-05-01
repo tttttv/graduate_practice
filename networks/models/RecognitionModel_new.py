@@ -4,7 +4,10 @@ import pickle
 import numpy as np
 import pandas as pd
 import cv2
+from skimage.color import rgb2gray, gray2rgb
+
 from networks.commons import functions
+from lime import lime_image
 
 class RecognitionModel:
     """Абстрактный класс для моделей"""
@@ -54,6 +57,8 @@ class RecognitionModel:
             for index in range(0, len(people)):
                 human = people[index]
 
+                print(human.shape, 'HUMAN')
+
                 img_objs = functions.extract_faces(
                     img=human,
                     target_size=target_size,
@@ -76,22 +81,22 @@ class RecognitionModel:
                     instance.append(img_region["h"])
                     representations.append(instance)
 
+
             with open(f"{db_path}/{file_name}", "wb") as f: #Сохраняем в файл для след запуска
                 pickle.dump(representations, f)
-
 
         df = pd.DataFrame(
             representations,
             columns=df_cols,
         )
-
+        print('PATH1', img_path)
         source_objs = functions.extract_faces(
             img=img_path,
             target_size=target_size,
         )
 
         resp_obj = []
-
+        print('LENNN', len(source_objs))
         for source_img, source_region, _ in source_objs:
             target_embedding_obj = self.represent(
                 img_path=source_img,
@@ -112,7 +117,7 @@ class RecognitionModel:
 
                 distance = functions.get_distance(source_representation, target_representation)
                 distances.append(distance)
-
+            print('DISTANCES', distances)
 
             result_df[f"{self.model_name}"] = distances
 
@@ -136,6 +141,7 @@ class RecognitionModel:
         # ---------------------------------
         # we have run pre-process in verification. so, this can be skipped if it is coming from verify.
         target_size = functions.get_target_size(model_name=self.model_name)
+        print('PATH', img_path)
         if not skip:
             img_objs = functions.extract_faces( #:todo
                 img=img_path,
@@ -158,16 +164,63 @@ class RecognitionModel:
             img_region = [0, 0, img.shape[1], img.shape[0]]
             img_objs = [(img, img_region, 0)]
 
-
+        print(len(img_objs), 'LEN')
         for img, region, confidence in img_objs:
+            from skimage.segmentation import mark_boundaries
+            import matplotlib.pyplot as plt
+            def plot_comparison(img, mask):
+                fig = plt.figure(figsize=(15, 5))
+                ax = fig.add_subplot(142)
+                ax.imshow(img)
+                ax.set_title("Image")
+                ax = fig.add_subplot(143)
+                ax.imshow(mask)
+                ax.set_title("Mask")
+                ax = fig.add_subplot(144)
+                ax.imshow(mark_boundaries(img, mask, color=(0, 1, 0)))
+                ax.set_title("Image+Mask Combined")
+
+                fig.savefig()
+
+            """Explainer"""
+            colored_image = img_path#gray2rgb(self.img).reshape(-1, 160, 160, 3)
+
+            def make_prediction(color_img):
+                preds = self.model.predict(color_img)
+                return preds
+
+            preds = make_prediction(colored_image)
+            pred_class = preds.argmax(axis=-1)[0]
+            print(pred_class, "PREDS")
+
+            self.old_img = img
+            img = img.reshape(1,-1)
+            print(img.shape, 'HUMAN4')
+            explainer = lime_image.LimeImageExplainer(random_state=123)
+            explanation = explainer.explain_instance(colored_image[0].squeeze(), make_prediction, random_seed=123)
+            print('PRED', explanation.local_pred)
+            print(explanation.segments)
+            print(explanation)
+            LABEL = list(explanation.local_exp.keys())[4] #40#2026#40
+            img, mask = explanation.get_image_and_mask(pred_class)
+            print(img, mask)
+            print("1END")
+            print(img.shape)
+
+            plot_comparison(self.img[0], img, mask)
+            input('2?')
+
             if "keras" in str(type(self.model)):
                 embedding = self.model(img, training=False).numpy()[0].tolist()
             else:
                 # SFace and Dlib are not keras models and no verbose arguments
                 embedding = self.model.predict(img)[0].tolist()
 
+
+
             resp_obj = {}
             resp_obj["embedding"] = embedding
+            print('got embedding', embedding)
             resp_obj["facial_area"] = region
             resp_obj["face_confidence"] = confidence
             resp_objs.append(resp_obj)

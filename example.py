@@ -3,7 +3,7 @@ from networks.models import *
 
 if __name__ == '__main__':
     models = [
-        Facenet(), VGGFace()
+        Facenet(), VGGFace(), ArcFace(), GhostFaceNet()
     ]
 
     ex = [

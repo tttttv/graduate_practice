@@ -26,6 +26,7 @@ class AdversarialExperimentSeries:
     def __init__(self, models, experiments, dataset_path="data/test_images/", db_path="data/train_images", debug_output=True):
         self.models = models
         self.dataset_folder = dataset_path
+        self.db_folder = db_path
         self.experiments = experiments
         self.debug_output = debug_output
 
@@ -58,11 +59,12 @@ class AdversarialExperimentSeries:
                     print(person)
 
                     images_path = self.dataset_folder + person + '/' + experiment.name + '/'
+
                     dr = os.listdir(images_path)
                     result[model.model_name][experiment.name]['total'] += len(dr)
 
                     for image in dr:
-                        predict, distance, facial_area = find_person(model, images_path + image)
+                        predict, distance, facial_area = find_person(model, images_path + image, self.db_folder)
 
                         if self.debug_output:
                             save_predicted_photo(images_path + image, model.model_name, predict, person, facial_area, distance, image)

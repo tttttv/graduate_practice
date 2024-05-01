@@ -1,13 +1,14 @@
 from PIL import Image, ImageDraw
 
-def find_person(model, image_path):
+def find_person(model, image_path, db_path):
+    print('PATH0', image_path)
     face = model.extract_faces(img_path=image_path)[0]
     print('detected face', face)
     facial_area = face['facial_area']
     face_coords = [facial_area['x'], facial_area['y'], facial_area['x'] + facial_area['w'],
                    facial_area['y'] + facial_area['h']]
 
-    result = model.find(img_path=image_path, db_path="data/train_images")
+    result = model.find(img_path=image_path, db_path=db_path)
 
     print('RES2', result)
 
